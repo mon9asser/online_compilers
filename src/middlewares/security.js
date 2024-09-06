@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 
 // Apply security-related HTTP headers
 const applySecurity = (app) => {
+  
   app.use(helmet());
 
   // Enable CORS with specific configurations

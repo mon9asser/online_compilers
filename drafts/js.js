@@ -25,9 +25,9 @@ const EXECUTION_TIMEOUT = 10000; // 10 seconds
 // Dangerous command patterns (for basic filtering)
 const dangerousPatterns = [/exec\(/, /spawn\(/, /rm/, /cat/, /cd/, /child_process/];
 
-router.post('/compile', validateCodeInput, (req, res) => {
+router.post('/run/javascript', validateCodeInput, (req, res) => {
   const { language, code } = req.body;
-
+  
   // Check if the language is supported
   if (!languages[language]) {
     return res.status(400).json({ error: 'Unsupported language.' });
@@ -38,11 +38,11 @@ router.post('/compile', validateCodeInput, (req, res) => {
   if (isDangerous) {
     return res.status(400).json({ error: 'Code contains potentially dangerous commands.' });
   }
-
+  
   const langConfig = languages[language];
   const filename = `code_${uuidv4()}.${langConfig.ext}`;
   const filepath = path.resolve(tempDir, filename);
-
+  
   // Handle JavaScript with VM2 sandbox
   if (language === 'javascript') {
     try {
@@ -54,8 +54,9 @@ router.post('/compile', validateCodeInput, (req, res) => {
           builtin: [] // No built-in modules allowed
         }
       });
-
+      
       const result = vm.run(code);
+       
       res.json({ output: result });
     } catch (err) {
       console.error('VM execution error:', err);
@@ -63,7 +64,7 @@ router.post('/compile', validateCodeInput, (req, res) => {
     }
     return;
   }
-
+  
   // For other languages (e.g., Python), write to a file and spawn a process
   fs.writeFile(filepath, code, (err) => {
     if (err) {
@@ -109,12 +110,14 @@ router.post('/compile', validateCodeInput, (req, res) => {
       if (code !== 0) {
         return res.status(400).json({ error: stderr || 'Error during execution.' });
       }
-
+      
       res.json({ output: stdout });
     });
 
     // Handle execution errors
     execution.on('error', (execErr) => {
+
+      
       res.status(500).json({ error: 'Error executing code.' });
 
       // Ensure the temporary file is deleted
