@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { applySecurity } = require('./src/middlewares/security');
 const {javaScriptCompiler} = require('./src/routes/javascript');
+const {pythonCompiler} = require('./src/routes/python');
 
 const app = express();
 
@@ -16,6 +17,7 @@ applySecurity(app);
 
 // Use the compile route
 app.use('/api/run', javaScriptCompiler);
+app.use('/api/run', pythonCompiler);
 
 // Global error handler
 app.use((err, req, res, next) => {

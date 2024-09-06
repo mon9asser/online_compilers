@@ -2,14 +2,37 @@ const express = require('express');
 const { spawn } = require('child_process');
 const { validateCodeInput } = require('../middlewares/security');
 const { NodeVM } = require('vm2');
-const javaScriptCompiler = express.Router();
+const pythonCompiler = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+ 
+
 let { restrictedPatterns } = require('./../middlewares/restricted') 
 
-const restrictedModules =  ['fs', 'express', 'vm2', 'child_process', 'child_process.promises', 'os', 'process']
-
+// const restrictedModules =  ['fs', 'express', 'vm2', 'child_process', 'child_process.promises', 'os', 'process']
+ 
+const restrictedModules = [
+    'os', 
+    'sys', 
+    'subprocess', 
+    'shutil', 
+    'socket', 
+    'multiprocessing',
+    'threading', 
+    'signal', 
+    'ctypes', 
+    'inspect', 
+    'http', 
+    'requests',
+    'ftplib', 
+    'smtplib', 
+    'poplib', 
+    'resource', 
+    'eval', 
+    'exec', 
+    'open'
+];
 
 function isCodeRestricted(code) {
     // Check for restricted modules
@@ -29,7 +52,7 @@ function isCodeRestricted(code) {
  
  
 
-javaScriptCompiler.post("/javascript", (req, res) => {
+pythonCompiler.post("/python", (req, res) => {
 
     var code = req.body.code;
     
@@ -53,7 +76,7 @@ javaScriptCompiler.post("/javascript", (req, res) => {
     }
 
     // build file of temp name
-    const filename = `code_${uuidv4()}.js`;
+    const filename = `code_${uuidv4()}.py`;
     const filepath = path.join(tempDir, filename);
 
     // create the file in temp root
@@ -65,7 +88,7 @@ javaScriptCompiler.post("/javascript", (req, res) => {
         }
 
         // Spawn a child process to execute the code with 'node' as the command
-        const execution = spawn('node', [filepath], {
+        const execution = spawn('python3', [filepath], {
             cwd: tempDir,
             timeout: 1000,
             maxBuffer: 1024 * 1024, // 1MB buffer for stdout and stderr
@@ -111,5 +134,5 @@ javaScriptCompiler.post("/javascript", (req, res) => {
 
 
 
-module.exports = { javaScriptCompiler };
+module.exports = { pythonCompiler };
  
