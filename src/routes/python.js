@@ -35,11 +35,12 @@ const restrictedModules = [
 ];
 
 function isCodeRestricted(code) {
-    // Check for restricted modules
-    const hasRestrictedModule = restrictedModules.some(module => {
-        const requirePattern = new RegExp(`require\\(['"]${module}['"]\\)`);
-        const importPattern = new RegExp(`import.*['"]${module}['"]`);
-        return requirePattern.test(code) || importPattern.test(code);
+    
+    // Check for restricted modules using `import` and `from` syntax
+    const hasRestrictedModule = restrictedPythonModules.some(module => {
+        const importPattern = new RegExp(`import\\s+${module}\\b`);
+        const fromPattern = new RegExp(`from\\s+${module}\\s+import\\b`);
+        return importPattern.test(code) || fromPattern.test(code);
     });
 
     // Check for restricted patterns
