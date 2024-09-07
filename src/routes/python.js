@@ -1,12 +1,14 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const { validateCodeInput } = require('../middlewares/security');
+const {executions} = require('./../config');
 const { NodeVM } = require('vm2');
 const pythonCompiler = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
  
+
 
 let { restrictedPatterns } = require('./../middlewares/restricted') 
 
@@ -36,6 +38,10 @@ const restrictedModules = [
 
 function isCodeRestricted(code) {
 
+    // add new restrticted list 
+    var restircted_arrray = [/eval\(/g, /exec\(/g,/open\(/g];
+   // var newrestrictedPatterns = [...restrictedPatterns, ...restircted_arrray]
+
     // Check for restricted modules using `import` and `from` syntax
     const hasRestrictedModule = restrictedModules.some(module => {
         const importPattern = new RegExp(`import\\s+${module}\\b`);
@@ -44,7 +50,7 @@ function isCodeRestricted(code) {
     });
 
     // Check for restricted patterns
-    const hasRestrictedPattern = restrictedPatterns.some(pattern => pattern.test(code));
+    const hasRestrictedPattern = restircted_arrray.some(pattern => pattern.test(code));
 
     // Return true if any restricted module or pattern is found
     return hasRestrictedModule || hasRestrictedPattern;
@@ -89,7 +95,7 @@ pythonCompiler.post("/python", (req, res) => {
         }
 
         // Spawn a child process to execute the code with 'node' as the command
-        const execution = spawn('python3', [filepath], {
+        const execution = spawn( executions.python, [filepath], {
             cwd: tempDir,
             timeout: 1000,
             maxBuffer: 1024 * 1024, // 1MB buffer for stdout and stderr

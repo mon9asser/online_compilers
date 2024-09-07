@@ -2,6 +2,7 @@ const express = require('express');
 const { spawn } = require('child_process');
 const { validateCodeInput } = require('../middlewares/security');
 const { NodeVM } = require('vm2');
+const {executions} = require('./../config');
 const javaScriptCompiler = express.Router();
 const fs = require('fs');
 const path = require('path');
@@ -20,10 +21,10 @@ function isCodeRestricted(code) {
     });
 
     // Check for restricted patterns
-    const hasRestrictedPattern = restrictedPatterns.some(pattern => pattern.test(code));
+    // const hasRestrictedPattern = restrictedPatterns.some(pattern => pattern.test(code));
 
     // Return true if any restricted module or pattern is found
-    return hasRestrictedModule || hasRestrictedPattern;
+    return hasRestrictedModule ; //|| hasRestrictedPattern;
 }
 
  
@@ -65,7 +66,7 @@ javaScriptCompiler.post("/javascript", (req, res) => {
         }
 
         // Spawn a child process to execute the code with 'node' as the command
-        const execution = spawn('node', [filepath], {
+        const execution = spawn(executions.javascript, [filepath], {
             cwd: tempDir,
             timeout: 1000,
             maxBuffer: 1024 * 1024, // 1MB buffer for stdout and stderr

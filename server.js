@@ -5,7 +5,7 @@ const cors = require('cors');
 const { applySecurity } = require('./src/middlewares/security');
 const {javaScriptCompiler} = require('./src/routes/javascript');
 const {pythonCompiler} = require('./src/routes/python');
-
+const {phpInterpreter} = require('./src/routes/php');
 const app = express();
 
 // Parse JSON requests
@@ -18,7 +18,7 @@ applySecurity(app);
 // Use the compile route
 app.use('/api/run', javaScriptCompiler);
 app.use('/api/run', pythonCompiler);
-
+app.use('/api/run', phpInterpreter)
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
